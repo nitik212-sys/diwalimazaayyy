@@ -49,39 +49,8 @@ input{width:100%;background:#0d0826;border:1px solid #ffd36b55;border-radius:10p
 <input id="tx" maxlength="24" placeholder="Your message (max 24 characters)">
 <div class="pre" id="pre"></div>
 <input id="am" type="number" min="1" step="1" placeholder="Or any amount (₹)">
-<img id="qr" src="upi-qr.png" alt="UPI QR code" style="width:150px;display:block;margin:6px auto;border-radius:8px" onerror="this.remove()"><p>Optional. If UPI is set up, tap the button to pay in your UPI app, come back and tap “I’ve paid”. Payments are on trust and are not verified by the game. Normal crackers are always free.</p>
+<p>This is a demo: no real payment is taken. Normal crackers are always free.</p>
 <div class="row"><button class="go" id="lit">Light it up</button><button class="ghost" id="cx">Cancel</button></div></div></div>
-<script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,signInAnonymously} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getDatabase,ref,set,remove,push,onValue,onChildAdded,onDisconnect,query,limitToLast} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-/* ====== 1. PASTE YOUR FIREBASE CONFIG HERE (Project settings > Your apps > Web app) ====== */
-const firebaseConfig={
-  apiKey:"AIzaSyCdJiwkveBoL8-zxonex8fUgrgAB9XDTxg",
-  authDomain:"diwalimazaayyy.firebaseapp.com",
-  databaseURL:"https://diwalimazaayyy-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"diwalimazaayyy",
-  storageBucket:"diwalimazaayyy.firebasestorage.app",
-  messagingSenderId:"127638078456",
-  appId:"1:127638078456:web:144e7e979976a7198e0c0d"
-};
-/* ====== 2. OPTIONAL: your UPI ID for donations (leave id empty to keep donations as a demo) ====== */
-window.UPI={id:"",name:"Diwali Game"};
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app);
-window.claude={use:async n=>n!=="room"?null:{join:async name=>{
- await signInAnonymously(auth);const uid=auth.currentUser.uid,base="rooms/"+name;let off=0;
- await new Promise(r=>onValue(ref(db,".info/serverTimeOffset"),s=>{off=s.val()||0;r()},{onlyOnce:true}));
- const jt=Date.now()+off,L={},cbs=[],mine={},pr=ref(db,base+"/players/"+uid);let known={};
- onDisconnect(pr).remove();
- const room={
-  emit:async(topic,data)=>{const r=push(ref(db,base+"/events"));await set(r,{k:topic,d:data,by:uid,t:Date.now()+off});setTimeout(()=>remove(r).catch(()=>{}),10000)},
-  on:(topic,fn)=>{(L[topic]=L[topic]||[]).push(fn);return()=>{L[topic]=L[topic].filter(f=>f!==fn)}},
-  presence:async patch=>{Object.assign(mine,patch);await set(pr,mine)},
-  onPeers:fn=>{cbs.push(fn);return()=>{}}};
- onChildAdded(query(ref(db,base+"/events"),limitToLast(30)),s=>{const v=s.val();if(!v||v.t<jt-1500)return;(L[v.k]||[]).forEach(f=>f({data:v.d,peer:v.by}))});
- onValue(ref(db,base+"/players"),s=>{const o=s.val()||{},peers=Object.keys(o).map(id=>({peer:id,isMe:id===uid,presence:o[id]})),joined=peers.filter(p=>!known[p.peer]);known=Object.fromEntries(peers.map(p=>[p.peer,1]));cbs.forEach(f=>f({peers,joined,left:[],updated:[]}))});
- return room}}};
-</script>
 <script>
 const $=s=>document.querySelector(s),cv=$("#c"),g=cv.getContext("2d");
 const PAL=["#ffd36b","#ff9a3c","#ff5d8f","#7ee0ff","#fff1c4","#b6ff8a"];
@@ -166,7 +135,18 @@ function district(d){
  for(let x=36;x<W-10;x+=56)dy(x,GY+28);
  return c;
 }
-function boom(v=1){if(mute)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime,o=AC.createOscillator(),n=AC.createGain();o.type="sawtooth";o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(30,t+.4);n.gain.setValueAtTime(.2*v,t);n.gain.exponentialRampToValueAtTime(.001,t+.5);o.connect(n).connect(AC.destination);o.start();o.stop(t+.5)}catch(e){}}
+function ac(){AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC}
+function tn(ty,f0,f1,d,v=.2,dl=0){const a=ac(),t=a.currentTime+dl,o=a.createOscillator(),g=a.createGain();o.type=ty;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(a.destination);o.start(t);o.stop(t+d+.02)}
+function nz(d,v=.3,fr=1500,dl=0){const a=ac(),t=a.currentTime+dl,n=a.sampleRate*d|0,b=a.createBuffer(1,n,a.sampleRate),x=b.getChannelData(0);for(let i=0;i<n;i++)x[i]=Math.random()*2-1;const s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=b;f.type="lowpass";f.frequency.value=fr;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);s.connect(f).connect(g).connect(a.destination);s.start(t)}
+function vb(ty,f,d,v,rate,depth,dl=0){const a=ac(),t=a.currentTime+dl,o=a.createOscillator(),l=a.createOscillator(),lg=a.createGain(),g=a.createGain();o.type=ty;o.frequency.value=f;l.frequency.value=rate;lg.gain.value=depth;l.connect(lg).connect(o.frequency);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(a.destination);o.start(t);l.start(t);o.stop(t+d+.02);l.stop(t+d+.02)}
+const SFX=[()=>tn("sine",300,1800,.5),()=>tn("sine",1500,200,.6),()=>{tn("sine",150,520,.12,.3);tn("sine",520,110,.4,.3,.1)},
+ ()=>{vb("sawtooth",70,.55,.35,26,30);nz(.4,.15,400)},()=>{tn("square",520,300,.09,.15);tn("square",500,280,.12,.15,.14)},()=>{nz(.05,.5,3000);tn("sine",800,200,.1,.3)},
+ ()=>tn("sawtooth",1800,100,.25,.18),()=>{tn("sawtooth",233,220,.25,.2);tn("sawtooth",220,207,.25,.2,.27);tn("sawtooth",207,196,.25,.2,.54);vb("sawtooth",196,.7,.2,7,6,.81)},
+ ()=>vb("sawtooth",300,.45,.18,14,50),()=>{tn("sine",880,880,.18,.3);tn("sine",660,660,.4,.3,.2)},()=>{tn("square",900,1600,.12,.12);tn("square",1600,900,.12,.12,.14)},
+ ()=>{tn("sine",800,780,.12,.3);tn("sine",640,620,.2,.3,.16)},()=>{for(let i=0;i<5;i++)tn("sine",350+i*60,900+i*80,.07,.25,i*.09)},()=>tn("triangle",1200,100,.8,.25),()=>vb("triangle",900,.8,.25,9,200)];
+function funny(s){if(mute)return;try{SFX[Math.abs(s|0)%SFX.length]()}catch(e){}}
+function fanfare(){if(mute)return;try{[523,659,784,1047].forEach((f,i)=>tn("square",f,f,.14,.14,i*.13));tn("square",1047,1047,.5,.14,.55)}catch(e){}}
+function boom(v=1){if(mute)return;try{tn("sawtooth",140,30,.45,.12*v);nz(.3,.15*v,800)}catch(e){}}
 function sp(x,y,vx,vy,l,c,s,gv){if(P.length<7000)P.push({x,y,vx,vy,l,m:l,c,s,gv})}
 function txtfx(text,amt,seed){
  const c=document.createElement("canvas"),x=c.getContext("2d");c.width=700;c.height=140;let fs=100;x.font=`bold ${fs}px system-ui,sans-serif`;
@@ -179,8 +159,8 @@ function txtfx(text,amt,seed){
 function handle(d){
  if(!d||typeof d!=="object")return;const k=d.k,nm=String(d.n||"Someone").slice(0,14);
  if(k==="txt"){const t=String(d.t||"").replace(/[^\p{L}\p{N} !.,&♥'’-]/gu,"").slice(0,24).trim(),a=Math.min(1e6,Math.max(1,Math.floor(+d.a||1)));
-  if(!t)return;txtfx(t,a,d.s|0);tot+=a;donors[nm]=(donors[nm]||0)+a;lb();ui();toast(`${nm} donated ₹${a.toLocaleString("en-IN")} and lit “${t}”`);boom(1.6);return}
- if(!CR.some(c=>c[0]===k))return;
+  if(!t)return;txtfx(t,a,d.s|0);fanfare();tot+=a;donors[nm]=(donors[nm]||0)+a;lb();ui();toast(`${nm} donated ₹${a.toLocaleString("en-IN")} and lit “${t}”`);boom(1.6);return}
+ if(!CR.some(c=>c[0]===k))return;funny(d.s|0);
  const x=Math.min(N,Math.max(0,+d.x||0))*W,y=GY+8+Math.min(1,Math.max(0,+d.y||0))*(H-GY-28),s=d.s|0;
  if(["heart","willow","peacock","spiral"].includes(k))E.push({k:"rocket",v:k,x,y,t:0,s});
  else if(k==="sky")for(let i=0;i<4;i++)setTimeout(()=>E.push({k:"rocket",x:x+(i-1.5)*W*.12,y,t:0,s:s+i*7}),i*350);
@@ -270,7 +250,7 @@ function say(t){t=t.trim();if(!t)return;const d={n:me.n,t};if(room)room.emit("ch
 function send(d){d.n=me.n;if(room)room.emit("fx",d).catch(()=>{});else handle(d)}
 function fire(k){const n=Date.now();if(n-lastFire<500)return;lastFire=n;send({k,x:+me.x.toFixed(3),y:+me.y.toFixed(3),s:Math.random()*1e9|0})}
 function pres(){if(room)room.presence({n:me.n,o:me.o,tx:+me.tx.toFixed(3),ty:+me.ty.toFixed(3),x:+me.x.toFixed(3),y:+me.y.toFixed(3)}).catch(()=>{})}
-async function enter(code){
+async function enter(code){try{ac()}catch(e){}
  me.n=($("#nm").value.trim()||"Guest").slice(0,14);code=code.toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,8);
  if(!code){$("#st").textContent="Please enter a room code.";return}
  CODE=code;me.x=me.tx=.3+Math.random()*.4;me.y=me.ty=Math.random();$("#st").textContent="Joining…";
@@ -280,7 +260,7 @@ async function enter(code){
    r.n=String(q.n).slice(0,14);r.o=q.o;r.tx=+q.tx||0;r.ty=+q.ty||0;if(ch.joined.some(j=>j.peer===p.peer))toast(r.n+" joined the celebration 🎉")}
    for(const id in rem)if(!seen[id])delete rem[id];ui();pres()},()=>{});
   pres()}
- else toast("Could not reach the room server, so you are playing solo. Check the Firebase setup.");
+ else toast("Playing solo: live rooms need a signed-in claude.ai viewer.");
  inGame=true;$("#lobby").hidden=true;$("#hud").hidden=$("#bar").hidden=$("#pl").hidden=false;ui();
  toast(room?"Share the room code "+CODE.toUpperCase()+" with friends. Tap the ground to walk.":"Tap the ground to walk.")
 }
@@ -293,10 +273,9 @@ for(const[l,id]of[["💬 Chat","chat"],["🏆 Donors","lb"]]){const b=document.c
 $("#ci").onkeydown=e=>{if(e.key==="Enter"){say(e.target.value);e.target.value=""}};
 PL.forEach((p,i)=>{const b=document.createElement("button");b.textContent=p[0]+" "+p[1];b.onclick=()=>{me.tx=i+.5;me.ty=.5;pres()};$("#pl").appendChild(b)});
 for(const a of[11,51,101,501]){const b=document.createElement("button");b.textContent="₹"+a;b.onclick=()=>$("#am").value=a;$("#pre").appendChild(b)}
-$("#cx").onclick=()=>{paid=false;$("#lit").textContent="Light it up";$("#sky").hidden=true};
-let paid=false;$("#lit").onclick=()=>{const t=$("#tx").value.trim(),a=Math.floor(+$("#am").value),U=window.UPI||{};if(!t||!(a>=1)){toast("Add a message and an amount of at least ₹1.");return}
- if(U.id&&!paid){paid=true;$("#lit").textContent="I’ve paid — light it up";location.href="upi://pay?pa="+encodeURIComponent(U.id)+"&pn="+encodeURIComponent(U.name)+"&am="+a+"&cu=INR&tn="+encodeURIComponent("Diwali sky message");return}
- paid=false;$("#lit").textContent="Light it up";$("#sky").hidden=true;send({k:"txt",t,a,s:Math.random()*1e9|0});$("#tx").value=""};
+$("#cx").onclick=()=>$("#sky").hidden=true;
+$("#lit").onclick=()=>{const t=$("#tx").value.trim(),a=Math.floor(+$("#am").value);if(!t||!(a>=1)){toast("Add a message and an amount of at least ₹1.");return}
+ $("#sky").hidden=true;send({k:"txt",t,a,s:Math.random()*1e9|0});$("#tx").value=""};
 $("#mu").onclick=()=>{mute=!mute;$("#mu").textContent=mute?"🔇":"🔊"};
 $("#rc").onclick=()=>{try{navigator.clipboard.writeText(CODE.toUpperCase());toast("Room code copied")}catch(e){}};
 cv.addEventListener("pointerdown",e=>{if(!inGame)return;me.tx=Math.min(N,Math.max(0,(e.clientX+cam)/W));me.ty=Math.min(1,Math.max(0,(e.clientY-GY-8)/(H-GY-28)));pres()});
